@@ -1,6 +1,5 @@
-use crate::BlockExtractor;
+use crate::{BlockExtractor, DbConnect};
 use alloy_primitives::Bytes;
-use trevm::revm::{Database, DatabaseCommit};
 
 pub struct PawnHandle {
     sink: tokio::sync::mpsc::Sender<Bytes>,
@@ -14,18 +13,23 @@ impl PawnHandle {
 }
 
 /// Extract and execute transactions.
-pub struct Pawn<Extractor> {
+pub struct Pawn<Extractor, Connect> {
     extractor: Extractor,
+    connect: Connect,
 
     source: tokio::sync::mpsc::Receiver<Bytes>,
 }
 
-impl<Extractor> Pawn<Extractor> {
+impl<Extractor, Connect> Pawn<Extractor, Connect> {
     /// Create a new pawn.
-    pub fn new(extractor: Extractor) -> (Self, PawnHandle) {
+    pub fn new(extractor: Extractor, connect: Connect) -> (Self, PawnHandle) {
         let (sink, source) = tokio::sync::mpsc::channel(100);
 
-        let pawn = Pawn { extractor, source };
+        let pawn = Pawn {
+            extractor,
+            connect,
+            source,
+        };
 
         let handle = PawnHandle { sink };
 
@@ -33,26 +37,35 @@ impl<Extractor> Pawn<Extractor> {
     }
 }
 
-impl<Extractor> Pawn<Extractor> {
-    pub fn spawn<Ext, Db>(self, db: Db) -> std::thread::JoinHandle<eyre::Result<()>>
+impl<Extractor, Connect> Pawn<Extractor, Connect> {
+    pub fn spawn<Ext>(self) -> std::thread::JoinHandle<eyre::Result<()>>
     where
-        Db: Database + DatabaseCommit + Send + 'static,
-        Extractor: BlockExtractor<Ext, Db>,
+        Connect: DbConnect,
+        Extractor: BlockExtractor<Ext, <Connect as DbConnect>::Database>,
         Ext: 'static,
     {
-        std::thread::spawn(move || self.run(db))
+        std::thread::spawn(move || {
+            let rt = tokio::runtime::Builder::new_current_thread().build()?;
+            rt.block_on(self.run())
+        })
     }
 
     /// Run the pawn.
-    pub fn run<Ext, Db>(mut self, db: Db) -> eyre::Result<()>
+    pub async fn run<Ext>(mut self) -> eyre::Result<()>
     where
-        Db: Database + DatabaseCommit + 'static,
-        Extractor: BlockExtractor<Ext, Db>,
+        Connect: DbConnect,
+        Extractor: BlockExtractor<Ext, <Connect as DbConnect>::Database>,
         Ext: 'static,
     {
+        let db = self
+            .connect
+            .connect()
+            .await
+            .map_err(|e| eyre::eyre!("{}", e))?;
+
         let mut trevm = self.extractor.trevm(db);
 
-        while let Some(notification) = self.source.blocking_recv() {
+        while let Some(notification) = self.source.recv().await {
             let mut driver = self.extractor.extract(&notification);
 
             trevm = match trevm.drive_block(&mut driver) {

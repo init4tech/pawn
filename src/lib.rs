@@ -1,3 +1,6 @@
+mod db_connect;
+pub use db_connect::DbConnect;
+
 mod pawn;
 pub use pawn::{Pawn, PawnHandle};
 

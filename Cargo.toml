@@ -15,21 +15,6 @@ alloy-sol-types = { version = "0.8", features = ["json"] }
 alloy = { version = "=0.5.4", features = ["full", "rpc-types-mev", "genesis", "arbitrary"] }
 alloy-contract = { version = "=0.5.4", features = ["pubsub"] }
 
-# Reth
-reth = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-reth-chainspec = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-reth-db = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-reth-db-common = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-reth-eth-wire-types = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-reth-exex = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-reth-network-api = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-reth-network-peers = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-reth-node-api = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-reth-node-ethereum = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-reth-prune-types = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-reth-transaction-pool = { git = "https://github.com/paradigmxyz/reth", rev = "2fba3c0" }
-
 tokio = { version = "1.41.0", features = ["full", "sync"] }
 eyre = "0.6.12"
 alloy-rlp = "0.3.9"
