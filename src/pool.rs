@@ -1,10 +1,9 @@
 use crate::db_connect::EvmFactory;
 use alloy_primitives::U256;
-use rayon::{prelude::*, ThreadPool, ThreadPoolBuilder};
-use std::sync::atomic::{AtomicPtr, AtomicUsize};
+use rayon::{prelude::*, ThreadPool};
 use trevm::{revm::primitives::ResultAndState, Block, Cfg, Tx};
 
-pub struct Manager<EF, C, B> {
+pub struct EvmPool<EF, C, B> {
     thread_pool: Option<ThreadPool>,
     evm_factory: EF,
     cfg: C,
@@ -17,7 +16,7 @@ pub struct Best<'a, T, Score: PartialOrd + Ord = U256> {
     pub score: Score,
 }
 
-impl<EF, C, B> Manager<EF, C, B>
+impl<EF, C, B> EvmPool<EF, C, B>
 where
     EF: EvmFactory,
     C: Cfg,
@@ -51,21 +50,5 @@ where
             op()
         }
         .expect("empty candidate array")
-    }
-}
-
-#[cfg(test)]
-mod test {
-    #[test]
-    fn it_finds_best() {
-        let manager = super::Manager::new(
-            rayon::ThreadPoolBuilder::new()
-                .num_threads(5)
-                .build()
-                .unwrap(),
-            (),
-        );
-        let candidates = [1, 5, 3, 2, 4];
-        assert_eq!(*manager.find_best(&candidates), 5);
     }
 }

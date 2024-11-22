@@ -1,8 +1,6 @@
-use std::{convert::Infallible, marker::PhantomData};
-
+use std::marker::PhantomData;
 use trevm::{
     revm::{
-        db::{CacheDB, WrapDatabaseRef},
         primitives::{EVMError, ResultAndState},
         Database, DatabaseCommit, EvmBuilder,
     },
@@ -155,19 +153,5 @@ pub trait EvmFactory: DbConnect {
             Ok(t) => Ok(t.into_result_and_state()),
             Err(t) => Err(t.into_error()),
         }
-    }
-}
-
-impl<'a, Ext, Db> DbConnect for trevm::revm::Evm<'a, Ext, Db>
-where
-    Ext: Sync,
-    Db: Database + Sync,
-{
-    type Database = trevm::revm::db::CacheDB<WrapDatabaseRef<&Db>>;
-
-    type Error = Infallible;
-
-    fn connect(&self) -> Result<Self::Database, Self::Error> {
-        todo!()
     }
 }
