@@ -38,30 +38,29 @@ impl<Extractor, Connect> Pawn<Extractor, Connect> {
 }
 
 impl<Extractor, Connect> Pawn<Extractor, Connect> {
-    pub fn spawn<Ext>(self) -> std::thread::JoinHandle<eyre::Result<()>>
+    /// THIS FUNCTION BLOCKS INDEFINITELY
+    pub fn run_until_panic<Ext>(mut self)
     where
         Connect: DbConnect,
         Extractor: BlockExtractor<Ext, <Connect as DbConnect>::Database>,
         Ext: 'static,
     {
-        std::thread::spawn(move || {
-            let rt = tokio::runtime::Builder::new_current_thread().build()?;
-            rt.block_on(self.run())
-        })
+        std::thread::scope(|s| {
+            s.spawn(|| {
+                let rt = tokio::runtime::Builder::new_current_thread().build()?;
+                rt.block_on(self.run());
+            })
+        });
     }
 
     /// Run the pawn.
-    pub async fn run<Ext>(mut self) -> eyre::Result<()>
+    pub async fn run<Ext>(&mut self) -> eyre::Result<()>
     where
         Connect: DbConnect,
         Extractor: BlockExtractor<Ext, <Connect as DbConnect>::Database>,
         Ext: 'static,
     {
-        let db = self
-            .connect
-            .connect()
-            .await
-            .map_err(|e| eyre::eyre!("{}", e))?;
+        let db = self.connect.connect().map_err(|e| eyre::eyre!("{}", e))?;
 
         let mut trevm = self.extractor.trevm(db);
 
