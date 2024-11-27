@@ -10,3 +10,6 @@ mod example;
 
 mod pool;
 pub use pool::{Best, EvmPool};
+
+mod shared;
+pub use shared::{Child, ConcurrentCache, Root};
