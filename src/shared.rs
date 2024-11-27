@@ -45,9 +45,15 @@ impl ConcurrentCache {
             account.code_hash = KECCAK_EMPTY;
         }
     }
+
+    /// Insert account info but not override storage
+    pub fn insert_account_info(&mut self, address: Address, mut info: AccountInfo) {
+        self.insert_contract(&mut info);
+        self.accounts.entry(address).or_default().info = info;
+    }
 }
 
-/// Inner for [`Root`]
+/// Inner for [`Root`].
 pub struct RootInner<Db> {
     cache: ConcurrentCache,
     db: Db,
