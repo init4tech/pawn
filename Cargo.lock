@@ -2414,6 +2414,7 @@ dependencies = [
  "alloy-primitives",
  "alloy-rlp",
  "alloy-sol-types",
+ "dashmap",
  "eyre",
  "rayon",
  "tokio",
