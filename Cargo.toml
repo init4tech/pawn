@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 # trevm
-trevm = { version = "0.14", features = ["full_env_cfg"] }
+trevm = { version = "0.15", features = ["full_env_cfg"] }
 
 # Alloy base crates
 alloy-primitives = "0.8"

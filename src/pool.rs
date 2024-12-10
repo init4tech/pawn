@@ -1,6 +1,6 @@
-use crate::db_connect::EvmFactory;
 use alloy_primitives::U256;
 use rayon::{prelude::*, ThreadPool};
+use trevm::EvmFactory;
 use trevm::{revm::primitives::ResultAndState, Block, Cfg, Tx};
 
 pub struct EvmPool<EF, C, B> {
@@ -18,7 +18,7 @@ pub struct Best<'a, T, Score: PartialOrd + Ord = U256> {
 
 impl<EF, C, B> EvmPool<EF, C, B>
 where
-    EF: EvmFactory,
+    EF: for<'a> EvmFactory<'a>,
     C: Cfg,
     B: Block,
 {
