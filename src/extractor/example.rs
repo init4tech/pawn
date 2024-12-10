@@ -46,6 +46,7 @@ where
     }
 
     fn extract(&mut self, bytes: &[u8]) -> Self::Driver {
+        #[allow(clippy::useless_asref)]
         let txs: Vec<TxEnvelope> =
             alloy_rlp::Decodable::decode(&mut bytes.as_ref()).unwrap_or_default();
         Block(txs, NoopBlock)
