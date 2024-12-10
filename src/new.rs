@@ -1,12 +1,9 @@
 use alloy_primitives::U256;
-use std::{
-    future::Future,
-    sync::{Arc, Weak},
-};
-use tokio::{sync::Semaphore, task::JoinSet};
+use std::sync::{Arc, Weak};
+use tokio::task::JoinSet;
 use trevm::{revm::primitives::ResultAndState, Block, Cfg, EvmFactory, Tx};
 
-/// A trait for extracting transactions from a block.
+/// Evm context inner
 #[derive(Debug, Clone)]
 pub struct EvmCtxInner<Ef, C, B> {
     evm_factory: Ef,
@@ -14,9 +11,12 @@ pub struct EvmCtxInner<Ef, C, B> {
     block: B,
 }
 
+/// Evm evaluation context
 #[derive(Debug, Clone)]
 pub struct EvmCtx<Ef, C, B>(Arc<EvmCtxInner<Ef, C, B>>);
 
+/// Evm simulation pool
+#[derive(Debug, Clone)]
 pub struct EvmPool<Ef, C, B> {
     evm: EvmCtx<Ef, C, B>,
 }
@@ -29,19 +29,6 @@ where
 {
     fn weak_evm(&self) -> Weak<EvmCtxInner<Ef, C, B>> {
         Arc::downgrade(&self.evm.0)
-    }
-
-    fn spawn_eval<T, F>(
-        &self,
-        tx: Weak<T>,
-        evaluator: F,
-    ) -> tokio::task::JoinHandle<Option<Best<T>>>
-    where
-        T: Tx + 'static,
-        F: Fn(&ResultAndState) -> U256 + Send + Sync + 'static,
-    {
-        let evm = self.weak_evm();
-        tokio::task::spawn_blocking(|| eval_fn(evm, tx, evaluator))
     }
 }
 
@@ -84,6 +71,8 @@ where
     C: Cfg + 'static,
     B: Block + 'static,
 {
+    /// Spawn a task that will evaluate the best candidate from a channel of
+    /// candidates.
     pub fn spawn<T, F>(
         self,
         mut rx: tokio::sync::mpsc::Receiver<Arc<T>>,
