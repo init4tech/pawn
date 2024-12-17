@@ -5,15 +5,15 @@ edition = "2021"
 
 [dependencies]
 # trevm
-trevm = { version = "0.15", features = ["full_env_cfg"] }
+trevm = { version = "0.16", features = ["full_env_cfg"] }
 
 # Alloy base crates
 alloy-primitives = "0.8"
 alloy-sol-types = { version = "0.8", features = ["json"] }
 
 # Alloy periphery crates
-alloy = { version = "=0.5.4", features = ["full", "rpc-types-mev", "genesis", "arbitrary"] }
-alloy-contract = { version = "=0.5.4", features = ["pubsub"] }
+alloy = { version = "=0.7.3", features = ["full", "rpc-types-mev", "genesis", "arbitrary"] }
+alloy-contract = { version = "=0.7.3", features = ["pubsub"] }
 
 tokio = { version = "1.41.0", features = ["full", "sync"] }
 eyre = "0.6.12"
